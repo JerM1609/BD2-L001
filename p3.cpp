@@ -8,10 +8,10 @@
 using namespace std;
 
 int RNG(int first , int last){
-    random_device vasito ;
-    default_random_engine chocolatear(vasito()) ;
-    uniform_int_distribution<int> limites(first , last) ;
-    return limites(chocolatear) ;
+    random_device rd ;
+    default_random_engine dre(rd()) ;
+    uniform_int_distribution<int> limits(first , last) ;
+    return limits(dre) ;
 }
 
 struct Alumno 
@@ -29,7 +29,7 @@ struct Alumno
         vector<string> feat;
         stringstream fields(attributes);
 
-        while(getline(fields, var, '|'))
+        while(getline(fields, var, sep))
             feat.push_back(var);
 
         this->Nombre = feat[0]; 
@@ -89,6 +89,7 @@ public:
         if (file.is_open())
         {
             getline(file, line);
+
             while(pos--)
                 getline(file, line);
             
@@ -104,10 +105,12 @@ int main()
 {
     string fileName = "datos3.txt";
     VariableRecord vr(fileName);
-    // WRITE
+    
+    // ADD
     vr.add(Alumno("Jeremy", "Matos Cangalaya", "Computer Science", 2200.50));
     cout << '\n';
-    // READ
+
+    // LOAD
     auto alumnos = vr.load();
     for (const auto& al : alumnos)
         cout << al;

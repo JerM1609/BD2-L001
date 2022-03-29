@@ -1,13 +1,18 @@
-/**
-* ? pos = i * bytes || pos is an index
-*/
 #include <iostream>
 #include <vector>
 #include <utility>
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <random>
 using namespace std;
+
+int RNG(int first , int last){
+    random_device rd ;
+    default_random_engine dre(rd()) ;
+    uniform_int_distribution<int> limits(first , last) ;
+    return limits(dre) ;
+}
 
 void parseString(char arr[], int sz, const string& str)
 {
@@ -134,17 +139,25 @@ int main()
     string fileName = "datos1.txt";
     FixedRecord fr(fileName);
 
-    auto al = fr.readRecord(5);
-    cout << al << endl;
+    // ADD
+    fr.add(Alumno("202010311", "Jeremy Jeffrey", "Matos Cangalaya", "Computer Science"));
+    fr.add(Alumno("2020", "Jeffrey", "Cangalaya", "CS"));
     
-    // fr.add(Alumno("202010311", "Jeremy Jeffrey", "Matos Cangalaya", "Computer Science"));
-    // fr.add(Alumno("2020", "Jeremy", "Matos", "CS"));
- 
-    // auto alumnos = fr.load();
-    // cout << "ALUMNOS\n";
-    // for (auto a : alumnos)
-    //     cout << a << '\n';
+    // LOAD
+    auto alumnos = fr.load();
+    cout << "ALUMNOS\n";
+    for (auto a : alumnos)
+        cout << a << '\n';
     
+    // READ
+    int sz = alumnos.size(), test = 5;
+    while(test--)
+    {
+        auto rN = RNG(1, sz);
+        auto al = fr.readRecord(rN);
+        cout << rN << " -> " << al << '\n';
+    }
+
     return 0;
 }
 
