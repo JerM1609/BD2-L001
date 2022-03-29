@@ -73,7 +73,6 @@ public:
             
             Alumno al; al.nextDel = -1;
             outFile.write((char*) &al, sizeof(Alumno));
-
             outFile.close();
         }
     };
@@ -81,7 +80,7 @@ public:
     int sizeBin()
     {
         /**
-         * Tamaño del file sin registro centinela
+         * Tamaño del file contando registro centinela
          **/
 
         streampos begin, end;
@@ -89,7 +88,7 @@ public:
         
         size_t n = sizeof(Alumno);
 
-        file.seekg(n, ios::beg);    begin = file.tellg();
+        begin = file.tellg();
         file.seekg(0, ios::end);    end = file.tellg();
         file.close();
 
@@ -149,7 +148,22 @@ public:
         file.read((char*) &header, n);
         if (header.nextDel != -1)
         {   // ? FreeList Strategy
-            throw std::runtime_error("FreeList\n");
+            int prev, curr = header.nextDel;
+
+            // get index of last element deleted
+            Alumno traverse = this->readRecord(curr);
+            while(traverse.nextDel != -1)
+            {   
+                prev = curr;
+                curr = traverse.nextDel;
+                traverse = this->readRecord(curr);
+            }
+            // hit last deleted
+            this->rewriteLine(record, curr);
+            // 
+            auto prevRecord = this->readLine(prev);
+            prevRecord.nextDel = -1;
+            this->rewriteLine(prevRecord, prev);
         }
         else file.write((char*) &record, n);
 
@@ -192,6 +206,41 @@ public:
         return record;
     }
 
+    Alumno readLine(int pos)
+    {   // read (pos+1)*n-th token from binary file
+        ifstream file(this->fName, ios::binary);
+        Alumno record;
+
+        if (!file)
+            throw std::runtime_error("cannot open file!\n");
+
+        size_t n = sizeof(Alumno);
+
+        file.seekg((pos+1)*n, ios::beg);
+        file.read((char*)&record, n);
+
+        file.close();
+        if (!file.good())
+            throw std::runtime_error("error occurred at reading time\n");
+        return record;   
+    }
+
+    void rewriteLine(Alumno record, int pos)
+    {   // update (pos+1)*n-th token from binary file
+        ofstream file(this->fName, ios::binary);
+        
+        if (!file)
+            throw std::runtime_error("cannot open file!\n");
+        size_t n = sizeof(Alumno);
+        
+        file.seekp((pos+1)*n, ios::beg);
+        file.write((char*) &record, n);
+
+        file.close();
+        if (!file.good())
+            throw std::runtime_error("error occurred at writing time\n");
+    }
+
     bool deleteRecord(int pos)
     {
         /**
@@ -214,7 +263,7 @@ int main()
     freopen("input.txt", "r", stdin);
     freopen("output.txt", "w", stdout);
 #endif 
-    FixedRecord fr("datos2.bin");
+    FixedRecord fr("datos2.dat");
     
     // cout << sizeof(Alumno) << endl;
     Alumno al("202010311", "Jeremy Jeffrey", "Matos Cangalaya", "Computer Science", 1, 2200.5);
