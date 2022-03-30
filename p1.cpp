@@ -33,10 +33,10 @@ ostream& operator<<(ostream& os, pair<T*, int> pr)
 
 struct Alumno
 {
-    char codigo [5];
-    char nombre [11];
-    char apellidos [20];
-    char carrera [15];
+    char codigo [6];
+    char nombre [12];
+    char apellidos [21];
+    char carrera [16];
 
     Alumno() = default;
 
@@ -57,20 +57,20 @@ struct Alumno
 
 istream& operator>>(istream& stream, Alumno& record)
 {
-    stream.read(record.codigo, 5);
-    stream.read(record.nombre, 11);
-    stream.read(record.apellidos, 20);
-    stream.read(record.carrera, 15);
+    stream.read(record.codigo, 5);      record.codigo[5] = '\0';
+    stream.read(record.nombre, 11);     record.nombre[11] = '\0';
+    stream.read(record.apellidos, 20);  record.apellidos[20] = '\0';
+    stream.read(record.carrera, 15);    record.carrera[15] = '\0';
     stream.get();       // read \n
     return stream;
 }
 
 ostream& operator<<(ostream& stream, Alumno& record)
 {
-    stream.write(record.codigo, 5);     
-    stream.write(record.nombre, 11);
-    stream.write(record.apellidos, 20);
-    stream.write(record.carrera, 15);
+    stream.write(record.codigo, 5);      
+    stream.write(record.nombre, 11);     
+    stream.write(record.apellidos, 20);  
+    stream.write(record.carrera, 15);    
     stream << flush;
     return stream;
 }
@@ -147,7 +147,7 @@ int main()
     auto alumnos = fr.load();
     cout << "ALUMNOS\n";
     for (auto a : alumnos)
-        cout << a << '\n';
+        cout << a.codigo << " " << a.nombre << " " << a.apellidos << " " << a.carrera << '\n';
     
     // READ
     int sz = alumnos.size(), test = 5;
@@ -155,7 +155,8 @@ int main()
     {
         auto rN = RNG(1, sz);
         auto al = fr.readRecord(rN);
-        cout << rN << " -> " << al << '\n';
+        cout << rN << " -> ";
+        cout << al.codigo << " " << al.nombre << " " << al.apellidos << " " << al.carrera << '\n';
     }
 
     return 0;
