@@ -95,15 +95,14 @@ public:
          * Tamaño del file contando registro centinela
          **/
 
-        streampos begin, end;
+        
         ifstream file(fName, ios::binary);
         
         if (!file)
             throw std::runtime_error("cannot open file!\n");
-
-        begin = file.tellg();
-        file.seekg(0, ios::end);    
-        end = file.tellg();
+        
+        streampos begin, end;       begin = file.tellg();   
+        file.seekg(0, ios::end);    end = file.tellg();
 
         file.close();
         return end-begin;
@@ -141,41 +140,6 @@ public:
         return len;
     }
 
-    /*Alumno readLine(int pos)
-    {   // read n-th token from binary FreeList file
-        ifstream file(this->fName, ios::binary);
-        Alumno record;
-
-        if (!file)
-            throw std::runtime_error("cannot open file!\n");
-
-        size_t n = sizeof(Alumno);
-
-        file.seekg((pos+1)*n, ios::beg);
-        file.read((char*)&record, n);
-
-        file.close();
-        if (!file.good())
-            throw std::runtime_error("error occurred at reading time\n");
-        return record;   
-    }
-
-    void rewriteLine(Alumno record, int pos)
-    {   // update n-th token from binary FreeList file
-        ofstream file(this->fName, ios::binary);
-        
-        if (!file)
-            throw std::runtime_error("cannot open file!\n");
-        size_t n = sizeof(Alumno);
-        
-        file.seekp((pos+1)*n, ios::beg);
-        file.write((char*) &record, n);
-
-        file.close();
-        if (!file.good())
-            throw std::runtime_error("error occurred at writing time\n");
-    }*/
-
     vector<Alumno> load() 
     {   // upload records to std::vector
         /**
@@ -199,8 +163,8 @@ public:
             Alumno al;
             file.read((char*)&al, n);
 
-            if (al.nextDel == 0)
-                vec.push_back(al);  // is non-delete record
+            // if (al.nextDel == 0)
+            vec.push_back(al);  // is non-delete record
             start += n;
         }
 
@@ -215,10 +179,10 @@ public:
     {
         /**
          * Añadir al final si no hay eliminados
-         * Chancar el ultimo eliminado y cambiar el nextDel del anterior por -1
+         * Chancar el primer eliminado y cambiar el nextDel del head por el sgte
          **/
         fstream file;
-        file.open(this->fName, ios::in | ios::out | ios::app | ios::binary);
+        file.open(this->fName, ios::in | ios::out |ios::binary);
 
         if (!file)
             throw std::runtime_error("cannot open file!\n");
@@ -229,30 +193,32 @@ public:
         file.read((char*) &header, n);
         if (header.nextDel != -1)
         {   // ? FreeList Strategy
-            // int prev, curr = header.nextDel;
+            Alumno nextHeader;
+            // get nextDel of nextHeader
+            file.seekg(header.nextDel * n, ios::beg);
+            file.read((char*) &nextHeader, n);
+            cout << header.nextDel << " -> nHeader -> " << nextHeader << endl;
+            // update nextHeader line
+            file.seekp(header.nextDel * n, ios::beg);
+            file.write((char*) &record, n);
 
-            // // get index of last element deleted
-            // Alumno traverse = this->readRecord(curr);
-            // while(traverse.nextDel != -1)
-            // {   
-            //     prev = curr;
-            //     curr = traverse.nextDel;
-            //     traverse = this->readRecord(curr);
-            // }
-            // // hit last deleted
-            // this->rewriteLine(record, curr);
-            // // 
-            // auto prevRecord = this->readLine(prev);
-            // prevRecord.nextDel = -1;
-            // this->rewriteLine(prevRecord, prev);
+            // update index of header
+            file.seekp(0, ios::beg);
+            header.nextDel = nextHeader.nextDel;
+            file.write((char*) &header, n);
         }
-        else file.write((char*) &record, n);
+        else 
+        {
+            file.seekp(0, ios::end);
+            file.write((char*) &record, n);
+        }
 
         file.close();
         if (!file.good())
             throw std::runtime_error("error occurred at writing time\n");
     }
 
+    // ? pos hace referencia a la "linea" o al registro en posicion (sin contar eliminados)
     Alumno readRecord(int pos)
     {   // read n-th record of binary file | first index = 1
         /**
@@ -266,14 +232,15 @@ public:
         
         size_t n = sizeof(Alumno);
 
-        streampos goal = (pos+1)*n;     // goal cursor position
+        streampos goal = pos*n;     // goal cursor position
         file.seekg(n, ios::beg);        // initial position
         streampos start = file.tellg(); 
 
-        cout << "s: " << start << " goal: " << goal << endl;
+        cout << "(" << start << " ... " << goal << ") -> ";
 
         while (start != goal)
         {
+            file.read((char*) &record, n);
             if (record.nextDel == 0)            
                 start += n;     // file is valid
         }
@@ -285,19 +252,42 @@ public:
         return record;
     }
 
-    bool deleteRecord(int pos)
-    {
+    bool deleteRecord(int pos)      
+    {   // delete record LIFO strategy
         /**
          * Busqueda 
          * Cambio de flag al eliminado previo y al eliminado siguiente
+         * Leer el header
          **/
+        fstream file;
+        file.open(this->fName, ios::binary | ios::in | ios::out);
+        if (!file)
+            throw std::runtime_error("cannot open file!\n");
+
+        size_t n = sizeof(Alumno);
+        Alumno head;    file.read((char*) &head, n);
+
+        // set head nextDel in record to delete
+        Alumno posAl;
+        file.seekg(pos*n, ios::beg); file.read((char*)&posAl, n);
+        if (posAl.nextDel != 0)
+            throw std::runtime_error("index already deleted\n");
+        posAl.nextDel = head.nextDel;
+
+        file.seekp(pos*n, ios::beg); file.write((char*)&posAl, n);
+        // update head nextDel with pos value
+        head.nextDel = pos;
+        file.seekp(0, ios::beg); file.write((char*)&head, n);
+
+        if (!file.good())
+            throw std::runtime_error("error occurred at writing/reading time\n");
         return true;
     }
 };
 
 void loadPrint(FixedRecord& fixRec)
 {
-    auto al = fr.load();    
+    auto al = fixRec.load();    
     copy(al.begin(), al.end(), ostream_iterator<Alumno>(cout));
     cout << '\n';
 }
@@ -309,16 +299,16 @@ void test()
     vector<Alumno> alumnos;
     int num;
 
-    a1 = Alumno("202010311", "Jeremy Jeffrey", "Matos", "Computer Science", 4, 2200.5);
+    a1 = Alumno("202010311", "Jeremy Jeffrey", "Matos", "Computer Science", 4, 2200);
     a2 = Alumno("201715","Rafael","Galloso","Ing Mecanica", 5, 1900);
     a3 = Alumno("3274128","Angel Romario","Vega","Admin y ND", 6, 2400);
-    a4 = Alumno("12341","Fabrizio","Natal Fuentes Campos","Ing Ambiental", 8, 3250.78);
-    a5 = Alumno("124","Camila Alejandra","Turin Alcedo","Bioingenieria", 2, 1235.8);
-    a6 = Alumno("2021231","Marcos","Ayala Pineda","CS", 7, 2341.89);
-    a7 = Alumno("890324","Ariana","Ponce Bohorquez","Bioingenieria", 9, 2312.7);
-    a8 = Alumno("432512","Cecilia Natali","Pilco","Ciencia de la Computacion", 5, 2134.890);
-    a9 = Alumno("63543","Andre Ruben","Quiroga","Derecho", 4, 1231.9);
-    a10 = Alumno("123412","Nicolas","Uman Alvarado","Literatura", 2, 2131.78);
+    a4 = Alumno("12341","Fabrizio","Natal Fuentes Campos","Ing Ambiental", 8, 3250);
+    a5 = Alumno("124","Camila Alejandra","Turin Alcedo","Bioingenieria", 2, 1235);
+    a6 = Alumno("2021231","Marcos","Ayala Pineda","CS", 7, 2341);
+    a7 = Alumno("890324","Ariana","Ponce Bohorquez","Bioingenieria", 9, 2312);
+    a8 = Alumno("432512","Cecilia Natali","Pilco","Ciencia de la Computacion", 5, 2134);
+    a9 = Alumno("63543","Andre Ruben","Quiroga","Derecho", 4, 1231);
+    a10 = Alumno("123412","Nicolas","Uman Alvarado","Literatura", 2, 2131);
     
     cout << "\tsizeof(Alumno): " << sizeof(Alumno) << endl;
     cout << "\tinitial size of file: " << fr.sizeBin() << endl;
@@ -331,25 +321,33 @@ void test()
 
     num = fr.numRecords();
     cout << "\t numRecords: "<< num << endl;
-    cout << "\tmetadata: (" << alumnos.size() << " + 1) * " << sizeof(Alumno) << " = " << fr.sizeBin() << endl;
+    cout << "\tmetadata: (" << alumnos.size() << " + 1) * " << sizeof(Alumno) << " = " << fr.sizeBin() << "\n\n";
         
     // READ
-    int iterations = RNG(1, num);
+    int iterations = RNG(1, num), idx;   
+    cout << "\tit: " << iterations << endl;
+
     while (iterations--)
-    {
-        auto aux = fr.readRecord(RNG(1, num));
+    {   
+        idx = RNG(1, num); cout << idx << " -> ";
+        auto aux = fr.readRecord(idx);
         cout << aux;
     }
-
+    cout << endl;
     // DELETE
     fr.deleteRecord(3); fr.deleteRecord(5); 
-    loadPrint(fr);
+    // loadPrint(fr);  cout << endl;
     
     fr.deleteRecord(1); fr.deleteRecord(2);
-    loadPrint(fr);
+    loadPrint(fr);  cout << endl;
 
+    fr.add(a6);
+    loadPrint(fr);  cout << endl;
+
+    fr.add(a7); 
+    loadPrint(fr);  cout << endl;
     // ADD AFTER DELETE
-    fr.add(a6); fr.add(a7); 
+    /*fr.add(a6); fr.add(a7); 
     loadPrint(fr);
 
     fr.add(a8); 
@@ -360,7 +358,7 @@ void test()
 
     num = fr.numRecords();
     cout << "\t numRecords: "<< num << endl;
-    cout << "\tmetadata: (" << alumnos.size() << " + 1) * " << sizeof(Alumno) << " = " << fr.sizeBin() << endl;
+    cout << "\tmetadata: (" << alumnos.size() << " + 1) * " << sizeof(Alumno) << " = " << fr.sizeBin() << endl;*/
 }   
 
 int main()
