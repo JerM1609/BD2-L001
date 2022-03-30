@@ -1,4 +1,5 @@
 *.exe
+*.dat
 .vscode
 main.cpp
 input.txt

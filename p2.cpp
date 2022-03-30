@@ -232,19 +232,14 @@ public:
         
         size_t n = sizeof(Alumno);
 
-        streampos goal = pos*n;     // goal cursor position
-        file.seekg(n, ios::beg);        // initial position
-        streampos start = file.tellg(); 
-
-        cout << "(" << start << " ... " << goal << ") -> ";
-
-        while (start != goal)
-        {
-            file.read((char*) &record, n);
-            if (record.nextDel == 0)            
-                start += n;     // file is valid
-        }
+        file.seekg(pos*n, ios::beg);
         file.read((char*) &record, n);
+        if (record.nextDel != 0)    
+        {
+            cout << "deleted element -> ";
+            //throw std::runtime_error("record is unavailable\n");
+        }
+            
 
         file.close();
         if (!file.good())
@@ -334,6 +329,7 @@ void test()
         cout << aux;
     }
     cout << endl;
+
     // DELETE
     fr.deleteRecord(3); fr.deleteRecord(5); 
     // loadPrint(fr);  cout << endl;
@@ -346,10 +342,8 @@ void test()
 
     fr.add(a7); 
     loadPrint(fr);  cout << endl;
-    // ADD AFTER DELETE
-    /*fr.add(a6); fr.add(a7); 
-    loadPrint(fr);
 
+    // ADD AFTER DELETE
     fr.add(a8); 
     loadPrint(fr);
 
@@ -358,7 +352,23 @@ void test()
 
     num = fr.numRecords();
     cout << "\t numRecords: "<< num << endl;
-    cout << "\tmetadata: (" << alumnos.size() << " + 1) * " << sizeof(Alumno) << " = " << fr.sizeBin() << endl;*/
+    cout << "\tmetadata: (" << alumnos.size() << " + 1) * " << sizeof(Alumno) << " = " << fr.sizeBin() << endl;
+
+    fr.deleteRecord(3); fr.deleteRecord(5); 
+    fr.deleteRecord(1); fr.deleteRecord(2);
+    loadPrint(fr);       
+
+    iterations = RNG(1, num), idx;   
+    cout << "\tit: " << iterations << endl;
+
+    while (iterations--)
+    {   
+        idx = RNG(1, num); cout << idx << " -> ";
+        auto aux = fr.readRecord(idx);
+        cout << aux;
+    }
+    cout << endl;
+    
 }   
 
 int main()
