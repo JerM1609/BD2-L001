@@ -1,6 +1,8 @@
 *.exe
 *.dat
+*.py
 .vscode
 main.cpp
 input.txt
 output.txt
+venv\

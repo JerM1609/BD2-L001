@@ -373,7 +373,7 @@ void test()
 
 int main()
 {
-#ifndef ONLINE_JUDGE
+#ifndef TEST
     freopen("input.txt", "r", stdin);
     freopen("output.txt", "w", stdout);
 #endif
