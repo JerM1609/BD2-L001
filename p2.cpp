@@ -1,9 +1,3 @@
-/**
- * ! Implement all operations for binary file
- * ! Missing binary file
- * ! Use FreeList strategy in bool delete(int pos)
-*/
-
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -94,8 +88,6 @@ public:
         /**
          * Tamaño del file contando registro centinela
          **/
-
-        
         ifstream file(fName, ios::binary);
         
         if (!file)

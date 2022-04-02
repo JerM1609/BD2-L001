@@ -150,7 +150,7 @@ int main()
         cout << a.codigo << " " << a.nombre << " " << a.apellidos << " " << a.carrera << '\n';
     
     // READ
-    int sz = alumnos.size(), test = 5;
+    int sz = alumnos.size(), test = RNG(1, alumnos.size());
     while(test--)
     {
         auto rN = RNG(1, sz);

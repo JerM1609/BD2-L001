@@ -1,5 +1,4 @@
 *.exe
-*.dat
 *.py
 .vscode
 main.cpp
