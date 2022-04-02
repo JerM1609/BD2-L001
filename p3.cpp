@@ -5,6 +5,8 @@
 #include <string>
 #include <sstream>
 #include <random>
+#include <iomanip>
+#define endll '\n'
 using namespace std;
 
 int RNG(int first , int last){
@@ -14,91 +16,82 @@ int RNG(int first , int last){
     return limits(dre) ;
 }
 
-struct Alumno 
+struct Alumno
 {
     string Nombre;
     string Apellidos;
     string Carrera;
     float mensualidad;
 
-    Alumno() = default;
-    Alumno(string n, string a, string c, float m):Nombre{n}, Apellidos{a}, Carrera{c}, mensualidad{m}{}
-    Alumno(string attributes, char sep)
-    {
-        string var;
-        vector<string> feat;
-        stringstream fields(attributes);
-
-        while(getline(fields, var, sep))
-            feat.push_back(var);
-
-        this->Nombre = feat[0]; 
-        this->Apellidos = feat[1]; 
-        this->Carrera = feat[2];
-        this->mensualidad = stof(feat[3]);
+    Alumno()=default;
+    Alumno(const string& Nombre, const string& Apellidos, const string& Carrera, float mensualidad): Nombre(Nombre), Apellidos(Apellidos), Carrera(Carrera), mensualidad(mensualidad) {}
+    void building(){
+        getline(cin,Nombre);
+        getline(cin,Apellidos);
+        getline(cin,Carrera);
+        cin>>mensualidad;
     }
-};
+    string print(){
+        return Nombre+" "+Apellidos+" "+Carrera+" "+to_string(mensualidad);
+    }
+    
 
-ostream& operator<<(ostream& os, Alumno a)
-{
-    os << a.Nombre << " || " << a.Apellidos << " || " << a.Carrera << " || " << a.mensualidad << '\n';
-    return os;
+};
+void saving_alumno(Alumno& nuevo, string& leido){
+    vector<string> cont; 
+    stringstream led(leido);
+    while(getline(led, leido, '|')){
+        cont.push_back(leido);
+    }
+    nuevo.Nombre = cont[0];
+    nuevo.Apellidos = cont[1];
+    nuevo.Carrera = cont[2];
+    nuevo.mensualidad = stof(cont[3]);
 }
 
-class VariableRecord
-{
-    string fName;
+class VariableRecord{
+    string archivo; 
 public:
-    VariableRecord(string str) : fName{str}{};
+    VariableRecord(string archivo): archivo(archivo){}
+    
+    Alumno readRecord(int pos){
+        ifstream stream(archivo); 
+        Alumno nuevo; 
+        string leido; 
+        int i  = 1; 
 
-    vector<Alumno> load()
-    {
-        vector<Alumno> vec;
-        ifstream file(this->fName);
-        string line;
-
-        if (file.is_open())
-        {
-            getline(file, line);
-            while(getline(file, line))
-                vec.push_back(Alumno(line, '|'));
-            
-            file.close();
+        while(getline(stream, leido)){             
+            if(i == pos){
+                saving_alumno(nuevo, leido);
+                break; 
+            }
+            i++; 
         }
-        else throw std::runtime_error("file open error\n");
-
-        return vec;
+        stream.close();
+        return nuevo; 
+    }
+    vector<Alumno> load(){
+        vector<Alumno> out; 
+        ifstream stream(archivo);
+        string leido; 
+        Alumno nuevo; 
+        while(getline(stream, leido)){
+                       
+            saving_alumno(nuevo, leido);
+            out.push_back(nuevo);
+            
+        }
+        return out;
     }
 
-    void add(Alumno record)
-    {
-        ofstream file(this->fName, ios::app);
-        if (file.is_open())
-        {
-            file << '\n' << record.Nombre << "|" << record.Apellidos << "|" << record.Carrera << "|" << record.mensualidad;       
-            file.close();            
-        }
-        else throw std::runtime_error("file open error\n");
-    }
-
-    Alumno readRecord(int pos)
-    {
-        ifstream file(this->fName);
-        string line; 
-
-        if (file.is_open())
-        {
-            getline(file, line);
-
-            while(pos--)
-                getline(file, line);
-            
-            file.close();          //cout << line << endl;
-        }
-        else throw std::runtime_error("file open error\n");
+    void add(const Alumno& record){
+        ofstream stream(archivo, ios::app);
         
-        return Alumno(line, '|');
+        stream << record.Nombre+'|'+record.Apellidos+'|'+record.Carrera+'|';
+        stream << fixed<< setprecision(2)<<record.mensualidad;
+        stream <<'\n';
     }
+
 };
 
 int main()
@@ -108,19 +101,23 @@ int main()
     
     // ADD
     vr.add(Alumno("Jeremy", "Matos Cangalaya", "Computer Science", 2200.50));
+    vr.add(Alumno("Marcos Daniel", "Ayala Pineda", "Computer Science", 2100));
     cout << '\n';
 
     // LOAD
     auto alumnos = vr.load();
-    for (const auto& al : alumnos)
-        cout << al;
-    cout << '\n';
+    vector<Alumno> s1 = vr.load();
+    for(int i = 0 ; i <s1.size(); i++){
+        cout<<s1[i].Nombre<<" "<<s1[i].Apellidos<<" "<<s1[i].Carrera<<" "<<s1[i].mensualidad<<endll; 
+    }
 
     // READ
     int sz = alumnos.size(), test = 5;
+
     while(test--)
     {
         auto rN = RNG(1, sz);
-        cout << rN << " -> " << vr.readRecord(rN);
+        cout << rN << " -> "<< vr.readRecord(rN).print()<<endll;
     }
+
 }
