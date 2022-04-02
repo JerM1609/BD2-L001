@@ -373,10 +373,6 @@ void test()
 
 int main()
 {
-#ifndef TEST
-    freopen("input.txt", "r", stdin);
-    freopen("output.txt", "w", stdout);
-#endif
     test();
     return 0;
 }
