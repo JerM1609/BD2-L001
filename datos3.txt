@@ -1,4 +1,10 @@
-Nombre|Apellidos|Carrera|Mensualidad
-Howard|Paredes Zegarra|Computacion|1500.00
+Howard|Paredes Zegarra|Computacion|1500.00 
 Penny|Vargas Cordero|Industrial|2550.50
 Sheldon|Cooper Quizpe|Mecatronica|1850.00
+Lidya|Cooper Quizpe|Mecatronica|1850.00
+Thony|Cooper Quizpe|Mecatronica|1850.00
+Marcos Daniel|Ayala Pineda|CS|100.00
+Jeremy|Matos Cangalaya|Computer Science|2200.50
+Jeremy|Matos Cangalaya|Computer Science|2200.50
+Jeremy|Matos Cangalaya|Computer Science|2200.50
+Marcos Daniel|Ayala Pineda|Computer Science|2100.00
