@@ -4,4 +4,10 @@
 0004 Pamela     Vargas Cordero      Industrial     
 0005 Vanesa     Cooper Quizpe       Mecatronica    
 0006 Jesus      Vega Cordero        Industrial     
-0007 Heider     Sanchez Quizpe      Mecatronica      
+0007 Heider     Sanchez Quizpe      Mecatronica    
+0008 Marcos     Ayala Pineda        Ciencias       
+0009 Marcos DaniAyala Pineda        Computer Scienc
+20201Jeremy JeffMatos Cangalaya     Computer Scienc
+20201Jeremy JeffMatos Cangalaya     Computer Scienc
+20201Jeremy JeffMatos Cangalaya     Computer Scienc
+20201Jeremy JeffMatos Cangalaya     Computer Scienc
