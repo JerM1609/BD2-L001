@@ -19,16 +19,16 @@ public:
     Alumno(string scodigo, string snombre, string sapellidos, string scarrera){
         for(int i = 0  ; i<5; i++) {
             codigo[i] = scodigo.size() <= i ?  ' ' : scodigo[i]; 
-        }            
+        }   codigo[5] = '\0';
         for(int i = 0  ; i<11; i++) {
             nombre[i] = snombre.size() <=i ?  ' ' : snombre[i]; 
-        }            
+        }   nombre[11] = '\0';
         for(int i = 0  ; i<20; i++) {
             apellidos[i] = sapellidos.size() <=i ?  ' ' : sapellidos[i];
-        }        
+        }   apellidos[20] = '\0';
         for(int i = 0  ; i<15; i++) {
             carrera[i] = scarrera.size() <=i ?  ' ' : scarrera[i];
-        }
+        }   carrera[15] = '\0';
     }
     void print(){cout<<codigo<<" "<<nombre<<" "<<apellidos<<" "<<carrera<<endl;}
 };

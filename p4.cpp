@@ -36,10 +36,6 @@ struct Alumno
 
     Alumno() = default;
     Alumno(string c, int ci, float men, string obs): codigo{c}, ciclo{ci}, mensualidad{men}, observaciones{obs}{}
-    Alumno(char* buffer)
-    {
-        // desempaquetar
-    }
 
     size_t sizeBytes()
     {
@@ -50,33 +46,6 @@ struct Alumno
         sz += observaciones.size();
         return sz;
     }
-
-    size_t sizeRecord()
-    {
-        int n = this->sizeBytes() + 4;
-        return n;
-    }
-
-    char* pack()
-    {
-        auto szRecord = this->sizeRecord();
-        char* buffer = new char[szRecord];
-        memset(buffer, 0, szRecord);
-        buffer[0] = ':';
-        strcat(buffer, codigo.c_str());
-        buffer[codigo.size()+1] = ':';
-        // cout << (char*) &ciclo << endl;
-        cout << reinterpret_cast<const char*>(&mensualidad) << endl;
-        // strcat(buffer, (char*) &ciclo);
-        // strcat(buffer, (char*) &mensualidad);
-        cout << sizeof((char*) &ciclo) << endl;
-        cout << sizeof((char*) &mensualidad) << endl;
-
-        buffer[codigo.size()+1] = ':';
-        strcat(buffer, observaciones.c_str());
-        return buffer;
-    }
-
 };
 
 ostream& operator<<(ostream& os, Alumno al)
@@ -158,16 +127,16 @@ public:
         // SAVE RECORD
         int n;      // RECORD LINE SIZE = BYTES OF OBJECT + 16 (4 ints de separador)
         n = record.codigo.size();   file.write((char*) &n, sizeof(int));
-        file.write(record.codigo.c_str(), record.codigo.size());
+        file.write(record.codigo.c_str(), n);
 
         n = sizeof(int);    file.write((char*) &n, n);
-        file.write((char*) &record.ciclo, sizeof(int));
+        file.write((char*) &record.ciclo, n);
 
         n = sizeof(float);  file.write((char*) &n, n);
-        file.write((char*) &record.mensualidad, sizeof(float));
+        file.write((char*) &record.mensualidad, n);
 
         n = record.observaciones.size();    file.write((char*) &n, sizeof(int));
-        file.write(record.observaciones.c_str(), record.observaciones.size());
+        file.write(record.observaciones.c_str(), n);
 
         file.close();
         if (!file.good())
